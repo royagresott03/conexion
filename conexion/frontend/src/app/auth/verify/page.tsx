@@ -141,7 +141,7 @@ export default function VerifyPage() {
           <div className="text-4xl mb-3">🛡️</div>
           <h1 className="font-display text-3xl font-bold gradient-text-rose">Verificación de identidad</h1>
           <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>
-            Solo toma 2 minutos • Tus datos están seguros y encriptados
+            Paso obligatorio • Solo toma 2 minutos • Tus datos están seguros y encriptados
           </p>
         </div>
 
@@ -210,6 +210,7 @@ export default function VerifyPage() {
                 </p>
               </div>
 
+              {/* Obligatorio: NO hay botón de omitir */}
               <button
                 onClick={() => setStep('document')}
                 disabled={!cedulaValid}
@@ -217,11 +218,9 @@ export default function VerifyPage() {
                 Continuar →
               </button>
 
-              <button onClick={() => router.push('/discover')}
-                className="w-full text-sm text-center py-2"
-                style={{ color: 'var(--text-muted)' }}>
-                Omitir por ahora (puedes verificar después en tu perfil)
-              </button>
+              <p className="text-center text-xs" style={{ color: 'var(--text-muted)' }}>
+                La verificación es obligatoria para usar Conexión
+              </p>
             </div>
           )}
 
@@ -423,7 +422,7 @@ export default function VerifyPage() {
                       ¡Identidad verificada!
                     </h2>
                     <p style={{ color: 'var(--text-muted)' }}>
-                      Ya tienes el badge ✓ en tu perfil. Las demás personas sabrán que eres real.
+                      Ya tienes el badge ✓ en tu perfil. Ahora cuéntanos qué te gusta.
                     </p>
                   </div>
                   {resultData.name_detected && (
@@ -438,9 +437,10 @@ export default function VerifyPage() {
                       Similitud facial: <strong>{Number(resultData.face_score).toFixed(0)}%</strong>
                     </div>
                   )}
-                  <button onClick={() => router.push('/discover')}
+                  {/* Redirige a selección de intereses, no a /discover */}
+                  <button onClick={() => router.push('/auth/setup-profile')}
                     className="btn-primary w-full py-3 rounded-xl font-semibold">
-                    Ir a Descubrir 🔥
+                    Continuar → Mis intereses 🎯
                   </button>
                 </>
               )}
@@ -461,10 +461,10 @@ export default function VerifyPage() {
                       className="btn-primary w-full py-3 rounded-xl font-semibold">
                       Intentar de nuevo
                     </button>
-                    <button onClick={() => router.push('/discover')}
-                      className="btn-ghost w-full py-3 rounded-xl text-sm">
-                      Continuar sin verificar
-                    </button>
+                    {/* Sin opción de "continuar sin verificar" */}
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      La verificación es requerida para acceder a Conexión
+                    </p>
                   </div>
                 </>
               )}
@@ -481,9 +481,10 @@ export default function VerifyPage() {
                       Te notificaremos por email cuando esté lista.
                     </p>
                   </div>
-                  <button onClick={() => router.push('/discover')}
+                  {/* En revisión puede continuar a seleccionar intereses mientras espera */}
+                  <button onClick={() => router.push('/auth/setup-profile')}
                     className="btn-primary w-full py-3 rounded-xl font-semibold">
-                    Continuar usando Conexión
+                    Continuar → Mis intereses 🎯
                   </button>
                 </>
               )}
