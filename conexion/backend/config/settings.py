@@ -8,6 +8,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production-x
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://localhost:3000'
+).split(',')
+
 INSTALLED_APPS = [
     # Local apps FIRST so custom User model is ready before admin
     'apps.users',
