@@ -48,8 +48,15 @@ interface AuthState {
 }
 
 const saveTokens = (access: string, refresh: string) => {
-  Cookies.set('access_token', access, { expires: 1 / 24, sameSite: 'lax' });
-  Cookies.set('refresh_token', refresh, { expires: 7, sameSite: 'lax' });
+  const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
+  const cookieOptions = isProduction
+    ? { expires: 1 / 24, sameSite: 'none' as const, secure: true }
+    : { expires: 1 / 24, sameSite: 'lax' as const };
+  const refreshOptions = isProduction
+    ? { expires: 7, sameSite: 'none' as const, secure: true }
+    : { expires: 7, sameSite: 'lax' as const };
+  Cookies.set('access_token', access, cookieOptions);
+  Cookies.set('refresh_token', refresh, refreshOptions);
   localStorage.setItem('access_token', access);
   localStorage.setItem('refresh_token', refresh);
 };
