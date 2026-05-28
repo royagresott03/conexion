@@ -13,3 +13,6 @@ celery==5.4.0
 python-decouple==3.8
 requests==2.32.3
 Pillow==10.4.0
+deepface==0.0.93
+tensorflow==2.13.0
+opencv-python-headless==4.8.1.78
