@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-// El navegador siempre llama a localhost:8000 directamente
+
 const API_URL = typeof window !== 'undefined'
   ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
   : (process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000');
@@ -12,7 +12,6 @@ const api = axios.create({
   withCredentials: false,
 });
 
-// Attach access token to every request
 api.interceptors.request.use((config) => {
   const token = Cookies.get('access_token') ||
     (typeof window !== 'undefined' ? localStorage.getItem('access_token') : null);
@@ -22,7 +21,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto-refresh on 401
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -52,7 +51,7 @@ api.interceptors.response.use(
 
 export default api;
 
-// ─── Auth ────────────────────────────────────────────────
+
 export const authApi = {
   register: (data: {
     email: string; password: string; password2: string;
@@ -71,7 +70,7 @@ export const authApi = {
     api.post('/auth/token/refresh/', { refresh }),
 };
 
-// ─── Profile ─────────────────────────────────────────────
+
 export const profileApi = {
   getMyProfile: () => api.get('/auth/profile/'),
   updateProfile: (data: Record<string, unknown>) =>
@@ -92,7 +91,7 @@ export const profileApi = {
     api.post('/auth/profile/location/', { latitude: lat, longitude: lon, city }),
 };
 
-// ─── Matches ─────────────────────────────────────────────
+
 export const matchApi = {
   getDiscover: () => api.get('/discover/'),
   swipe: (user_to: string, action: 'like' | 'superlike' | 'pass') =>
@@ -101,7 +100,7 @@ export const matchApi = {
   unmatch: (matchId: string) => api.delete(`/matches/${matchId}/`),
 };
 
-// ─── Chat ────────────────────────────────────────────────
+
 export const chatApi = {
   getConversations: () => api.get('/conversations/'),
   getMessages: (convId: string) => api.get(`/conversations/${convId}/messages/`),
@@ -109,7 +108,7 @@ export const chatApi = {
     api.post(`/conversations/${convId}/messages/send/`, { content, msg_type: msgType }),
 };
 
-// ─── Streaks ─────────────────────────────────────────────
+
 export const streakApi = {
   getMyStreaks: () => api.get('/streaks/'),
 };

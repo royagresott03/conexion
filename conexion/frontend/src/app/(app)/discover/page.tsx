@@ -74,7 +74,7 @@ export default function DiscoverPage() {
     }
   };
 
-  // Drag handlers
+
   const onPointerDown = (e: React.PointerEvent) => {
     dragStart.current = { x: e.clientX, y: e.clientY };
     setDragState(d => ({ ...d, isDragging: true }));

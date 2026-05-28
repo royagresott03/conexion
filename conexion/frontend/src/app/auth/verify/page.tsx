@@ -26,7 +26,7 @@ export default function VerifyPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
-  // Validate cedula format in real time
+
   const validateCedula = useCallback(async (value: string) => {
     const cleaned = value.replace(/\D/g, '');
     setCedula(cleaned);
@@ -52,14 +52,14 @@ export default function VerifyPage() {
     }
   }, []);
 
-  // Handle document photo upload
+
   const handleDocumentFile = (file: File) => {
     setDocumentFile(file);
     const url = URL.createObjectURL(file);
     setDocumentPreview(url);
   };
 
-  // Open camera for selfie
+
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -100,7 +100,7 @@ export default function VerifyPage() {
     }, 'image/jpeg', 0.9);
   };
 
-  // Submit everything
+
   const submitVerification = async () => {
     if (!documentFile || !selfieFile) {
       toast.error('Necesitas subir el documento y la selfie.');

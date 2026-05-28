@@ -28,12 +28,12 @@ class IdentityVerification(models.Model):
         'users.User', on_delete=models.CASCADE, related_name='verification'
     )
 
-    # Document info
+
     cedula_number = models.CharField(max_length=20, blank=True)
     cedula_front = models.ImageField(upload_to=document_upload_path, null=True, blank=True)
     selfie = models.ImageField(upload_to=selfie_upload_path, null=True, blank=True)
 
-    # Results
+
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     ocr_raw = models.JSONField(default=dict, blank=True)
     ocr_cedula_extracted = models.CharField(max_length=20, blank=True)
@@ -41,10 +41,10 @@ class IdentityVerification(models.Model):
     face_match_score = models.FloatField(null=True, blank=True)
     cedula_valid_format = models.BooleanField(null=True, blank=True)
 
-    # Rejection reason
+
     rejection_reason = models.TextField(blank=True)
 
-    # Timestamps
+
     submitted_at = models.DateTimeField(null=True, blank=True)
     verified_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)

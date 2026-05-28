@@ -14,21 +14,18 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
 ).split(',')
 
 INSTALLED_APPS = [
-    # Local apps FIRST so custom User model is ready before admin
     'apps.users',
     'apps.matches',
     'apps.chat',
     'apps.streaks',
     'apps.notifications',
     'apps.verification',
-    # Django core
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Third party
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -68,7 +65,6 @@ TEMPLATES = [
     },
 ]
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -80,7 +76,7 @@ DATABASES = {
     }
 }
 
-# Redis / Channels
+
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 
 CHANNEL_LAYERS = {
@@ -125,7 +121,6 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# CORS
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -140,7 +135,6 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

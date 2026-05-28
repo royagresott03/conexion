@@ -33,13 +33,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value.lower()
 
     def create(self, validated_data):
-        # Extract profile fields
+
         first_name = validated_data.pop('first_name')
         birth_date = validated_data.pop('birth_date', None)
         gender = validated_data.pop('gender', '')
         city = validated_data.pop('city', '')
 
-        # Create user
+
         email = validated_data['email']
         username = email.split('@')[0]
         base_username = username
@@ -54,7 +54,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=username,
         )
 
-        # Auto-create profile
+
         Profile.objects.create(
             user=user,
             first_name=first_name,
@@ -120,7 +120,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class PublicProfileSerializer(serializers.ModelSerializer):
-    """Serializer for viewing other users' profiles (no private fields)"""
     interests = InterestSerializer(many=True, read_only=True)
     age = serializers.ReadOnlyField()
     photos = serializers.SerializerMethodField()

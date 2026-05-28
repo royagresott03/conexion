@@ -12,7 +12,6 @@ from apps.users.serializers import PublicProfileSerializer
 
 
 class DiscoverView(APIView):
-    """Returns a stack of profiles to swipe on."""
 
     def get(self, request):
         profiles, scores = get_discover_profiles(request.user, limit=20)
@@ -28,7 +27,7 @@ class DiscoverView(APIView):
 
 
 class SwipeView(APIView):
-    """Process a like/superlike/pass action."""
+
 
     def post(self, request):
         serializer = SwipeSerializer(data=request.data)
@@ -53,7 +52,7 @@ class SwipeView(APIView):
             match_data = MatchSerializer(match_obj, context={'request': request}).data
             response_data['match_data'] = match_data
 
-            # Send real-time notification to the other user
+
             try:
                 channel_layer = get_channel_layer()
                 async_to_sync(channel_layer.group_send)(
@@ -66,7 +65,7 @@ class SwipeView(APIView):
                     }
                 )
             except Exception:
-                pass  # Don't fail if WS not available
+                pass  
 
         return Response(response_data, status=status.HTTP_200_OK)
 

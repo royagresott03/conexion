@@ -32,14 +32,9 @@ class ValidateCedulaView(APIView):
 
 
 class SubmitVerificationView(APIView):
-    """
-    Submit identity verification with document photo + selfie.
-    Runs full pipeline: OCR → cedula cross-check → face match.
-    """
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
-        # Check if already verified
         if request.user.is_verified:
             return Response({
                 'status': 'verified',
@@ -51,7 +46,6 @@ class SubmitVerificationView(APIView):
 
         data = serializer.validated_data
 
-        # Create or update verification record
         verification, _ = IdentityVerification.objects.get_or_create(user=request.user)
 
         if verification.status == 'verified':
@@ -60,7 +54,6 @@ class SubmitVerificationView(APIView):
                 'message': 'Ya tienes verificación aprobada.',
             })
 
-        # Save submitted data
         verification.cedula_number = data['cedula_number']
         verification.cedula_front = data['cedula_front']
         verification.selfie = data['selfie']
@@ -68,11 +61,10 @@ class SubmitVerificationView(APIView):
         verification.submitted_at = timezone.now()
         verification.save()
 
-        # Run verification pipeline
         try:
             results = run_verification(verification)
 
-            # Save results
+
             verification.status = results['status']
             verification.cedula_valid_format = results.get('cedula_format_valid')
             verification.face_match_score = results.get('face_score')
@@ -85,13 +77,11 @@ class SubmitVerificationView(APIView):
 
             if results['status'] == 'verified':
                 verification.verified_at = timezone.now()
-                # Mark user as verified
                 request.user.is_verified = True
                 request.user.save(update_fields=['is_verified'])
 
             verification.save()
 
-            # Build response
             response_data = {
                 'status': verification.status,
                 'message': self._get_message(verification.status),
@@ -126,7 +116,6 @@ class SubmitVerificationView(APIView):
 
 
 class VerificationStatusView(APIView):
-    """Returns the current verification status for the logged-in user."""
 
     def get(self, request):
         try:
@@ -141,7 +130,6 @@ class VerificationStatusView(APIView):
 
 
 class RetryVerificationView(APIView):
-    """Allows user to retry a rejected verification."""
 
     def post(self, request):
         try:
@@ -151,7 +139,6 @@ class RetryVerificationView(APIView):
             if verification.status == 'processing':
                 return Response({'message': 'Tu verificación está en proceso.'})
 
-            # Reset for retry
             verification.status = 'pending'
             verification.rejection_reason = ''
             verification.ocr_raw = {}

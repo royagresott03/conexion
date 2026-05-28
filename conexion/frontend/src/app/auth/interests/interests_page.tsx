@@ -51,7 +51,6 @@ export default function InterestsPage() {
     }
   };
 
-  // Group by category
   const byCategory = allInterests.reduce<Record<string, Interest[]>>((acc, i) => {
     if (!acc[i.category]) acc[i.category] = [];
     acc[i.category].push(i);

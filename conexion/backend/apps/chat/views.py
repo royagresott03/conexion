@@ -29,7 +29,6 @@ class ConversationDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         conv = super().get_object()
-        # Mark all messages as read on open
         conv.messages.filter(
             read_at__isnull=True
         ).exclude(sender=self.request.user).update(read_at=timezone.now())
@@ -41,7 +40,6 @@ class MessageListView(generics.ListAPIView):
 
     def get_queryset(self):
         conversation_id = self.kwargs['conversation_id']
-        # Verify participation
         try:
             conv = Conversation.objects.get(
                 id=conversation_id,
@@ -53,7 +51,6 @@ class MessageListView(generics.ListAPIView):
 
 
 class SendMessageView(APIView):
-    """REST fallback for sending messages (WebSocket preferred)."""
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request, conversation_id):
@@ -81,7 +78,6 @@ class SendMessageView(APIView):
         )
         conv.save(update_fields=['updated_at'])
 
-        # Update streak
         try:
             conv.streak.record_activity(request.user)
         except Exception:

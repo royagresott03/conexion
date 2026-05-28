@@ -1,10 +1,3 @@
-"""
-Verification service:
-- Validates Colombian cedula format
-- Uses OCR.space API (free) to extract text from document photo
-- Uses DeepFace (local, no cost) for face comparison
-- Falls back gracefully if APIs are unavailable
-"""
 import re
 import os
 import base64
@@ -17,16 +10,9 @@ logger = logging.getLogger(__name__)
 OCR_API_KEY = os.environ.get('OCR_API_KEY', 'K89999999')  # OCR.space free key
 
 
-# ─── Cédula colombiana ────────────────────────────────────────────────────────
 
 def validate_cedula_format(cedula: str) -> dict:
-    """
-    Validates Colombian cédula format.
-    Rules:
-    - Only digits
-    - Between 6 and 10 digits
-    - No leading zeros (except special cases)
-    """
+
     cedula = cedula.strip().replace('.', '').replace(',', '').replace(' ', '')
 
     if not cedula.isdigit():
@@ -50,7 +36,6 @@ def validate_cedula_format(cedula: str) -> dict:
             'cedula': cedula,
         }
 
-    # Known invalid sequences
     invalid_sequences = ['1234567890', '0000000000', '1111111111', '9999999999']
     if cedula in invalid_sequences or len(set(cedula)) == 1:
         return {
@@ -66,20 +51,15 @@ def validate_cedula_format(cedula: str) -> dict:
     }
 
 
-# ─── OCR — extraer texto del documento ───────────────────────────────────────
 
 def extract_text_from_document(image_file) -> dict:
-    """
-    Uses OCR.space free API to extract text from a document image.
-    Returns extracted text and detected cedula number.
-    """
+
     try:
-        # Read image and encode to base64
+
         image_file.seek(0)
         image_data = image_file.read()
         base64_image = base64.b64encode(image_data).decode('utf-8')
 
-        # Detect content type
         content_type = getattr(image_file, 'content_type', 'image/jpeg')
         base64_string = f'data:{content_type};base64,{base64_image}'
 
@@ -116,23 +96,20 @@ def extract_text_from_document(image_file) -> dict:
         full_text = ' '.join([r.get('ParsedText', '') for r in parsed_results])
         full_text_clean = full_text.replace('\n', ' ').replace('\r', ' ')
 
-        # Try to find cedula number in the extracted text
         cedula_patterns = [
-            r'\b(\d{8,10})\b',          # 8-10 digit sequences
-            r'C\.?C\.?\s*(\d{6,10})',    # CC followed by numbers
-            r'No\.?\s*(\d{6,10})',       # No. followed by numbers
-            r'NÚMERO\s+(\d{6,10})',      # NÚMERO followed by digits
+            r'\b(\d{8,10})\b',          
+            r'C\.?C\.?\s*(\d{6,10})',    
+            r'No\.?\s*(\d{6,10})',       
+            r'NÚMERO\s+(\d{6,10})',      
         ]
 
         detected_cedula = ''
         for pattern in cedula_patterns:
             matches = re.findall(pattern, full_text_clean, re.IGNORECASE)
             if matches:
-                # Take the longest match (most likely the cedula)
                 detected_cedula = max(matches, key=len)
                 break
 
-        # Try to find name (usually after APELLIDOS or NOMBRES)
         name_patterns = [
             r'APELLIDOS\s+([A-ZÁÉÍÓÚÑ\s]+)\s+NOMBRES',
             r'NOMBRES\s+([A-ZÁÉÍÓÚÑ\s]+)\s+',
@@ -161,7 +138,6 @@ def extract_text_from_document(image_file) -> dict:
         return {'success': False, 'error': 'Error al procesar el documento.'}
 
 
-# ─── Face comparison ─────────────────────────────────────────────────────────
 
 def compare_faces(document_image_file, selfie_image_file) -> dict:
     """
@@ -175,7 +151,7 @@ def compare_faces(document_image_file, selfie_image_file) -> dict:
         import numpy as np
         from PIL import Image
 
-        # Save both images to temp files
+
         with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as doc_tmp:
             document_image_file.seek(0)
             doc_tmp.write(document_image_file.read())
@@ -195,7 +171,6 @@ def compare_faces(document_image_file, selfie_image_file) -> dict:
             )
             distance = result.get('distance', 1.0)
             verified = result.get('verified', False)
-            # Convert distance to similarity score (0-100)
             similarity = max(0, min(100, (1 - distance) * 100))
 
             return {
@@ -210,7 +185,6 @@ def compare_faces(document_image_file, selfie_image_file) -> dict:
 
     except ImportError:
         logger.warning('DeepFace not installed — skipping face comparison')
-        # Return neutral result — manual review will handle it
         return {
             'success': True,
             'match': None,
@@ -225,17 +199,8 @@ def compare_faces(document_image_file, selfie_image_file) -> dict:
         }
 
 
-# ─── Main verification flow ───────────────────────────────────────────────────
 
 def run_verification(verification_obj) -> dict:
-    """
-    Full verification pipeline:
-    1. Validate cedula format
-    2. OCR the document
-    3. Cross-check cedula from form vs OCR
-    4. Face comparison
-    5. Return final verdict
-    """
     results = {
         'cedula_format_valid': False,
         'ocr_success': False,
@@ -246,14 +211,13 @@ def run_verification(verification_obj) -> dict:
         'rejection_reason': '',
     }
 
-    # Step 1 — Validate cedula format
+
     cedula_result = validate_cedula_format(verification_obj.cedula_number)
     results['cedula_format_valid'] = cedula_result['valid']
     if not cedula_result['valid']:
         results['rejection_reason'] = cedula_result['error']
         return results
 
-    # Step 2 — OCR document
     if verification_obj.cedula_front:
         verification_obj.cedula_front.seek(0)
         ocr_result = extract_text_from_document(verification_obj.cedula_front)
@@ -264,13 +228,13 @@ def run_verification(verification_obj) -> dict:
             extracted_cedula = ocr_result.get('detected_cedula', '')
             extracted_name = ocr_result.get('detected_name', '')
 
-            # Step 3 — Cross-check cedula
+
             entered = verification_obj.cedula_number.strip()
             if extracted_cedula and extracted_cedula == entered:
                 results['cedula_match'] = True
             elif not extracted_cedula:
-                # OCR couldn't find cedula number — not a hard failure
-                results['cedula_match'] = None  # inconclusive
+
+                results['cedula_match'] = None  
             else:
                 results['cedula_match'] = False
                 results['rejection_reason'] = (
@@ -281,7 +245,7 @@ def run_verification(verification_obj) -> dict:
 
             results['extracted_name'] = extracted_name
 
-    # Step 4 — Face comparison
+
     if verification_obj.cedula_front and verification_obj.selfie:
         verification_obj.cedula_front.seek(0)
         verification_obj.selfie.seek(0)
@@ -298,15 +262,14 @@ def run_verification(verification_obj) -> dict:
                 )
                 return results
 
-    # Step 5 — Final verdict
     cedula_ok = results['cedula_format_valid']
-    cedula_match = results.get('cedula_match')  # True, False, or None (inconclusive)
-    face_ok = results.get('face_match')  # True, False, or None
+    cedula_match = results.get('cedula_match') 
+    face_ok = results.get('face_match')  
 
     if cedula_ok and cedula_match is not False and face_ok is not False:
         results['status'] = 'verified'
     elif cedula_ok and cedula_match is None:
-        # OCR couldn't confirm — send to manual review
+
         results['status'] = 'manual_review'
         results['rejection_reason'] = 'Verificación incompleta — en revisión manual.'
     else:

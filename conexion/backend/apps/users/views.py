@@ -28,7 +28,6 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # Generate tokens
         refresh = RefreshToken.for_user(user)
 
         return Response({
@@ -145,7 +144,7 @@ class UploadPhotoView(APIView):
         if slot not in ['1', '2', '3', '4', '5', '6']:
             return Response({'error': 'Slot inválido. Usa 1-6.'}, status=400)
 
-        # Validate file type
+
         allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
         if photo.content_type not in allowed_types:
             return Response({'error': 'Solo se permiten imágenes JPG, PNG o WebP.'}, status=400)

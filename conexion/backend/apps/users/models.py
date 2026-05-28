@@ -92,7 +92,6 @@ class Profile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    # Basic info
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50, blank=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -101,26 +100,21 @@ class Profile(models.Model):
     looking_for = models.CharField(max_length=15, choices=LOOKING_FOR_CHOICES, default='any')
     bio = models.TextField(max_length=500, blank=True)
     occupation = models.CharField(max_length=100, blank=True)
-    # Location
     city = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100, blank=True, default='Colombia')
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    # Photos - up to 6
     photo_1 = models.ImageField(upload_to=profile_photo_upload, null=True, blank=True)
     photo_2 = models.ImageField(upload_to=profile_photo_upload, null=True, blank=True)
     photo_3 = models.ImageField(upload_to=profile_photo_upload, null=True, blank=True)
     photo_4 = models.ImageField(upload_to=profile_photo_upload, null=True, blank=True)
     photo_5 = models.ImageField(upload_to=profile_photo_upload, null=True, blank=True)
     photo_6 = models.ImageField(upload_to=profile_photo_upload, null=True, blank=True)
-    # Interests
     interests = models.ManyToManyField(Interest, blank=True, related_name='profiles')
-    # Preferences
     min_age_preference = models.IntegerField(default=18)
     max_age_preference = models.IntegerField(default=45)
     max_distance_km = models.IntegerField(default=50)
     show_gender = models.CharField(max_length=5, choices=GENDER_CHOICES + [('A', 'Todos')], default='A')
-    # Profile completion
     profile_complete = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)

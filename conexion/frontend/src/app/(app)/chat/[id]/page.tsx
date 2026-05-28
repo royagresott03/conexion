@@ -47,7 +47,7 @@ export default function ChatWindowPage() {
   const typingTimer = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load conversation + messages
+
   useEffect(() => {
     Promise.all([
       chatApi.getMessages(conversationId),
@@ -63,12 +63,12 @@ export default function ChatWindowPage() {
       .finally(() => setLoading(false));
   }, [conversationId]);
 
-  // Scroll to bottom
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, otherTyping]);
 
-  // WebSocket handler
+
   const handleWsMessage = useCallback((data: Record<string, unknown>) => {
     const type = data.type as string;
 
@@ -82,7 +82,7 @@ export default function ChatWindowPage() {
         created_at: data.created_at as string,
       };
       setMessages(prev => {
-        // Avoid duplicates
+
         if (prev.find(m => m.id === newMsg.id)) return prev;
         return [...prev, newMsg];
       });
@@ -118,7 +118,6 @@ export default function ChatWindowPage() {
     sendTyping(false);
     setIsTyping(false);
 
-    // Optimistic UI
     const tempMsg: Message = {
       id: `temp-${Date.now()}`,
       sender_id: user?.id || '',
@@ -129,7 +128,7 @@ export default function ChatWindowPage() {
     };
     setMessages(prev => [...prev, tempMsg]);
 
-    // Try WebSocket first, fallback to REST
+
     try {
       wsSend(text);
     } catch {

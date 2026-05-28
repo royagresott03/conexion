@@ -20,7 +20,6 @@ def get_user_from_token(token_key):
 
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
-        # Try to get token from query string: ?token=...
         query_string = scope.get('query_string', b'').decode()
         params = parse_qs(query_string)
         token_list = params.get('token', [])

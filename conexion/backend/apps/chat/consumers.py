@@ -14,7 +14,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
         self.room_group_name = f'chat_{self.conversation_id}'
 
-        # Verify user is participant
         is_participant = await self.check_participant()
         if not is_participant:
             await self.close()
@@ -23,10 +22,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
-        # Update user online status
+
         await self.update_last_active()
 
-        # Notify others user is online
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -90,7 +89,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif msg_type == 'chat.read':
             await self.mark_messages_read()
 
-    # --- Handlers (channel layer → WebSocket) ---
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
@@ -118,7 +116,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'status': event['status'],
         }))
 
-    # --- DB helpers ---
+
 
     @database_sync_to_async
     def check_participant(self):
@@ -140,7 +138,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 content=content,
                 msg_type=msg_type,
             )
-            # Touch conversation updated_at
+
             conv.save(update_fields=['updated_at'])
             try:
                 sender_name = self.user.profile.first_name
