@@ -212,14 +212,13 @@ def create_admin(request):
     if request.method == 'POST':
         try:
             from apps.users.models import User
-            if not User.objects.filter(email='admin@conexion.com').exists():
-                User.objects.create_superuser(
-                    email='admin@conexion.com',
-                    password='Admin123456'
-                )
-                return JsonResponse({'ok': True, 'msg': 'Superusuario creado'})
-            else:
-                return JsonResponse({'ok': False, 'msg': 'Ya existe'})
+            user, created = User.objects.get_or_create(email='admin@conexion.com')
+            user.set_password('Admin123456')
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            msg = 'Creado' if created else 'Contraseña actualizada'
+            return JsonResponse({'ok': True, 'msg': msg})
         except Exception as e:
             return JsonResponse({'ok': False, 'msg': str(e)})
     return JsonResponse({'ok': False, 'msg': 'Usa POST'})
