@@ -3,9 +3,9 @@ import Cookies from 'js-cookie';
 
 // El navegador siempre llama a localhost:8000 directamente
 const API_URL = typeof window !== 'undefined'
-  ? 'http://localhost:8000'
+  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
   : (process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000');
-
+  
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: { 'Content-Type': 'application/json' },
