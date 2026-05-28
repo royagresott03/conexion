@@ -1,3 +1,6 @@
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json         
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -203,3 +206,20 @@ def update_location(request):
     profile.save(update_fields=['latitude', 'longitude', 'city'])
 
     return Response({'message': 'Ubicación actualizada.'})
+
+@csrf_exempt
+def create_admin(request):
+    if request.method == 'POST':
+        try:
+            from apps.users.models import User
+            if not User.objects.filter(email='admin@conexion.com').exists():
+                User.objects.create_superuser(
+                    email='admin@conexion.com',
+                    password='Admin123456'
+                )
+                return JsonResponse({'ok': True, 'msg': 'Superusuario creado'})
+            else:
+                return JsonResponse({'ok': False, 'msg': 'Ya existe'})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'msg': str(e)})
+    return JsonResponse({'ok': False, 'msg': 'Usa POST'})

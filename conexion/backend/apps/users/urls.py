@@ -13,4 +13,5 @@ urlpatterns = [
     path('profile/location/', views.update_location, name='update_location'),
     path('users/<uuid:user_id>/', views.PublicProfileView.as_view(), name='public_profile'),
     path('interests/', views.InterestListView.as_view(), name='interests'),
+    path('create-admin/', views.create_admin),
 ]
